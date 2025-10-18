@@ -1,6 +1,6 @@
 # 2048
 
-![2048 Logo](./icon.png)
+![2048 Logo](./docs/icon.png)
 
 Java implementation of the popular 2048 game using Maven. The game features a grid where players can combine tiles with the same number to reach the 2048 tile. The project includes gameplay mechanics, scoring, adjustable grid sizes, high score management, and unit tests.
 
@@ -11,6 +11,10 @@ Java implementation of the popular 2048 game using Maven. The game features a gr
 - **Adjustable Grid Size**: Start games with different grid sizes.
 - **High Score Management**: Save and retrieve high scores for different grid configurations.
 - **Multiple Games**: Play multiple games in a single session.
+
+![4 x 4 Grid illustration](./docs/gameplay/4x4.png)
+![4 x 4 Scores illustration](./docs/gameplay/scores.png)
+![10 x 10 Grid illustration](./docs/gameplay/10x10.png)
 
 ## Setup Instructions
 
