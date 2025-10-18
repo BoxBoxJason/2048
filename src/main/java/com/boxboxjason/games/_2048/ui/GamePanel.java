@@ -42,13 +42,19 @@ public class GamePanel extends StackPane {
     // Ensure minimum tile size
     currentTileSize = Math.max(currentTileSize, 20);
 
+    // Round tile size to avoid subpixel rendering issues
+    currentTileSize = Math.floor(currentTileSize);
+
+    // Recalculate actual grid size with rounded tile size
+    double actualGridSize = (currentTileSize * gridSize) + totalGapSize;
+
     // Constrain gridPane to the computed square so it will be centered by StackPane
-    gridPane.setMinWidth(availableSize);
-    gridPane.setMinHeight(availableSize);
-    gridPane.setPrefWidth(availableSize);
-    gridPane.setPrefHeight(availableSize);
-    gridPane.setMaxWidth(availableSize);
-    gridPane.setMaxHeight(availableSize);
+    gridPane.setMinWidth(actualGridSize);
+    gridPane.setMinHeight(actualGridSize);
+    gridPane.setPrefWidth(actualGridSize);
+    gridPane.setPrefHeight(actualGridSize);
+    gridPane.setMaxWidth(actualGridSize);
+    gridPane.setMaxHeight(actualGridSize);
 
     updateGrid();
   }
@@ -70,8 +76,10 @@ public class GamePanel extends StackPane {
 
         if (value != 0) {
           Text text = new Text(String.valueOf(value));
-          text.setFont(Font.font("Arial", currentTileSize / 2.0));
-          text.setFill(Color.BLACK);
+          // Scale font size based on number of digits
+          double fontSize = calculateFontSize(value);
+          text.setFont(Font.font("Arial", fontSize));
+          text.setFill(getTextColor(value));
           text.setTextAlignment(TextAlignment.CENTER);
 
           GridPane.setHalignment(text, javafx.geometry.HPos.CENTER);
@@ -81,6 +89,32 @@ public class GamePanel extends StackPane {
         }
       }
     }
+  }
+
+  private double calculateFontSize(int value) {
+    // Calculate number of digits
+    int digits = String.valueOf(value).length();
+
+    // Scale font size based on number of digits
+    double baseFontSize = currentTileSize / 2.0;
+    if (digits >= 5) {
+      return baseFontSize * 0.5; // 5+ digits: 50% of base
+    } else if (digits == 4) {
+      return baseFontSize * 0.65; // 4 digits: 65% of base
+    } else if (digits == 3) {
+      return baseFontSize * 0.8; // 3 digits: 80% of base
+    } else {
+      return baseFontSize; // 1-2 digits: full size
+    }
+  }
+
+  private Color getTextColor(int value) {
+    // Use black text for lighter tiles, white for darker tiles
+    // Light tiles: 2, 4, 512, 1024, 4096
+    return switch (value) {
+      case 2, 4, 512, 1024, 4096 -> Color.BLACK;
+      default -> Color.WHITE;
+    };
   }
 
   private Color getTileColor(int value) {
@@ -96,7 +130,13 @@ public class GamePanel extends StackPane {
       case 512 -> Color.YELLOW;
       case 1024 -> Color.LIGHTYELLOW;
       case 2048 -> Color.LIMEGREEN;
-      default -> Color.DARKGRAY;
+      case 4096 -> Color.LIME;
+      case 8192 -> Color.MEDIUMSEAGREEN;
+      case 16384 -> Color.SEAGREEN;
+      case 32768 -> Color.TEAL;
+      case 65536 -> Color.DARKTURQUOISE;
+      case 131072 -> Color.DEEPSKYBLUE;
+      default -> value > 131072 ? Color.DARKBLUE : Color.DARKGRAY;
     };
   }
 
@@ -121,12 +161,11 @@ public class GamePanel extends StackPane {
           .ifPresent(
               username -> {
                 if (!username.trim().isEmpty()) {
-                  Score score =
-                      new Score(
-                          username.trim(),
-                          gameGrid.getScore(),
-                          gameGrid.getSize(),
-                          gameGrid.getDuration());
+                  Score score = new Score(
+                      username.trim(),
+                      gameGrid.getScore(),
+                      gameGrid.getSize(),
+                      gameGrid.getDuration());
                   if (onGameOver != null) {
                     onGameOver.accept(score);
                   }
