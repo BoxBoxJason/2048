@@ -2,6 +2,7 @@ package com.boxboxjason.games._2048;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -15,7 +16,22 @@ public class ScoreManager {
   private String filePath;
 
   public ScoreManager() {
-    this.filePath = "scores.json";
+    // Use cross-platform user data directory
+    String userHome = System.getProperty("user.home");
+    String appDir = userHome + File.separator + ".2048";
+
+    // Create directory if it doesn't exist
+    new File(appDir).mkdirs();
+
+    String scoresFile = appDir + File.separator + "scores.json";
+
+    this.filePath = scoresFile;
+    this.gson = new Gson();
+    loadScores();
+  }
+
+  public ScoreManager(String filePath) {
+    this.filePath = filePath;
     this.gson = new Gson();
     loadScores();
   }
@@ -54,5 +70,16 @@ public class ScoreManager {
 
   public List<Score> getTopScores() {
     return new ArrayList<>(scores);
+  }
+
+  public List<Score> getTopScoresForGridSize(int gridSize) {
+    return scores.stream()
+        .filter(score -> score.getGridSize() == gridSize)
+        .limit(10)
+        .toList();
+  }
+
+  public String getFilePath() {
+    return filePath;
   }
 }

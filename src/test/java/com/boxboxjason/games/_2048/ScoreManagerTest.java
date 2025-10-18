@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,30 +16,29 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("ScoreManager Test Suite")
 class ScoreManagerTest {
 
-  @TempDir
-  Path tempDir;
-
   private ScoreManager scoreManager;
   private String testFilePath;
 
   @BeforeEach
-  void setUp() {
-    testFilePath = tempDir.resolve("test_scores.json").toString();
+  void setUp() throws IOException {
+    testFilePath = "target/test_scores.json";
+    Files.deleteIfExists(Path.of(testFilePath));
     // Create a ScoreManager with custom file path for testing
-    scoreManager = new ScoreManager();
-    // Use reflection to set the private filePath field
-    try {
-      var field = ScoreManager.class.getDeclaredField("filePath");
-      field.setAccessible(true);
-      field.set(scoreManager, testFilePath);
-    } catch (Exception e) {
-      fail("Could not set filePath for testing");
-    }
+    scoreManager = new ScoreManager(testFilePath);
   }
 
   @AfterEach
   void tearDown() throws IOException {
     Files.deleteIfExists(Path.of(testFilePath));
+  }
+
+  @Test
+  @DisplayName("Default constructor should use cross-platform file location")
+  void testDefaultConstructorFilePath() {
+    ScoreManager defaultManager = new ScoreManager();
+    String expectedPath = System.getProperty("user.home") + java.io.File.separator + ".2048" + java.io.File.separator
+        + "scores.json";
+    assertEquals(expectedPath, defaultManager.getFilePath());
   }
 
   @Test
@@ -59,19 +57,8 @@ class ScoreManagerTest {
     Files.writeString(Path.of(testFilePath),
         "[{\"username\":\"user1\",\"score\":1000,\"dateTime\":\"2023-01-01T00:00:00\",\"gridSize\":4,\"duration\":60000},{\"username\":\"user2\",\"score\":2000,\"dateTime\":\"2023-01-01T00:00:00\",\"gridSize\":4,\"duration\":120000}]");
 
-    // Create new manager that should load the file
-    ScoreManager newManager = new ScoreManager();
-    try {
-      var field = ScoreManager.class.getDeclaredField("filePath");
-      field.setAccessible(true);
-      field.set(newManager, testFilePath);
-      // Trigger load
-      var loadMethod = ScoreManager.class.getDeclaredMethod("loadScores");
-      loadMethod.setAccessible(true);
-      loadMethod.invoke(newManager);
-    } catch (Exception e) {
-      fail("Could not load scores for testing");
-    }
+    // Create new manager with the test file path
+    ScoreManager newManager = new ScoreManager(testFilePath);
 
     List<Score> loadedScores = newManager.getTopScores();
     assertEquals(2, loadedScores.size());

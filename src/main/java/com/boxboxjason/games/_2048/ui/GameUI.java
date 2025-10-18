@@ -2,47 +2,136 @@ package com.boxboxjason.games._2048.ui;
 
 import com.boxboxjason.games._2048.Direction;
 import com.boxboxjason.games._2048.Grid;
+import com.boxboxjason.games._2048.ScoreManager;
 import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.layout.GridPane;
+import javafx.scene.control.Label;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.application.Platform;
 
 public class GameUI extends Application {
 
-  private static final int GRID_GAP = 10;
-  private static final Color BACKGROUND_COLOR = Color.BEIGE;
+  private static final Color BACKGROUND_COLOR = Color.web("#2d1810");
 
   private Grid gameGrid;
-  private GridPane gridPane;
-  private double currentTileSize;
+  private ScoreManager scoreManager;
+  private GamePanel gamePanel;
+  private ScoresPanel scoresPanel;
+  private StackPane centerPane;
+  private Spinner<Integer> gridSizeSpinner;
+  private Scene scene;
+  private BorderPane root;
+  private Label scoreLabel;
+  private HBox bottomBox;
 
   @Override
   public void start(Stage primaryStage) {
-    gameGrid = new Grid(4); // Default grid size is 4x4
-    gridPane = new GridPane();
-    gridPane.setHgap(GRID_GAP);
-    gridPane.setVgap(GRID_GAP);
-    gridPane.setStyle("-fx-background-color: #bbada0;");
+    gameGrid = new Grid(4);
+    scoreManager = new ScoreManager();
 
-    // Put gridPane inside a StackPane so it stays centered while the window resizes
-    StackPane root = new StackPane(gridPane);
-    Scene scene = new Scene(root, 600, 600, BACKGROUND_COLOR);
+    // Create panels
+    gamePanel = new GamePanel(gameGrid);
+    scoresPanel = new ScoresPanel(scoreManager, gameGrid.getSize());
+    gamePanel.setOnGameOver(score -> {
+      scoreManager.addScore(score);
+      scoresPanel.updateScores();
+      gameGrid.reinit(gameGrid.getSize());
+      gamePanel.resetGame();
+    });
+    gamePanel.setOnScoreChange(score -> scoreLabel.setText("Score: " + score));
 
+    // Center pane to switch between panels
+    centerPane = new StackPane();
+    centerPane.getChildren().addAll(scoresPanel, gamePanel); // gamePanel on top
+
+    // Button selector
+    ToggleButton gameButton = new ToggleButton("GAME");
+    ToggleButton scoresButton = new ToggleButton("SCORES");
+    ToggleGroup toggleGroup = new ToggleGroup();
+    gameButton.setToggleGroup(toggleGroup);
+    scoresButton.setToggleGroup(toggleGroup);
+    gameButton.setSelected(true); // Start with game
+    gameButton.setFocusTraversable(false);
+    scoresButton.setFocusTraversable(false);
+
+    HBox buttonBox = new HBox(20, gameButton, scoresButton);
+    buttonBox.setAlignment(Pos.CENTER);
+    buttonBox.setPadding(new Insets(15));
+    buttonBox.setStyle("-fx-background-color: #2d1810; -fx-border-color: #1a0f08; -fx-border-width: 2;");
+
+    // Style buttons - larger with ridge borders and uppercase bold text
+    String buttonStyle = "-fx-background-color: #8b4513; -fx-text-fill: #f4e4bc; -fx-font-size: 16px; -fx-font-weight: bold; "
+        +
+        "-fx-border-color: #654321; -fx-border-width: 3; -fx-border-style: solid; " +
+        "-fx-padding: 10 20 10 20; -fx-min-width: 120px; -fx-min-height: 40px;";
+    gameButton.setStyle(buttonStyle);
+    scoresButton.setStyle(buttonStyle);
+
+    // Grid size picker
+    gridSizeSpinner = new Spinner<>(2, 10, gameGrid.getSize());
+    gridSizeSpinner.setPrefWidth(80);
+    gridSizeSpinner.setFocusTraversable(false);
+    gridSizeSpinner.setStyle(
+        "-fx-background-color: #8b4513; -fx-border-color: #654321; -fx-border-width: 3; -fx-border-style: solid; -fx-text-fill: #f4e4bc; -fx-font-weight: bold;");
+    gridSizeSpinner.valueProperty().addListener((obs, oldVal, newVal) -> changeGridSize(newVal));
+
+    // Score display
+    scoreLabel = new Label("Score: 0");
+    scoreLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #f4e4bc;");
+
+    Label gridSizeLabel = new Label("Grid Size");
+    gridSizeLabel.setStyle("-fx-text-fill: #f4e4bc; -fx-font-weight: bold; -fx-font-size: 14px;");
+
+    // Bottom layout - stack grid size label and spinner vertically
+    VBox gridSizeBox = new VBox(5);
+    gridSizeBox.setAlignment(Pos.CENTER);
+    gridSizeBox.getChildren().addAll(gridSizeLabel, gridSizeSpinner);
+
+    bottomBox = new HBox(40);
+    bottomBox.setAlignment(Pos.CENTER);
+    bottomBox.setPadding(new Insets(15));
+    bottomBox.setMinHeight(60); // Ensure minimum height for proper display
+    bottomBox.setStyle("-fx-background-color: #2d1810; -fx-border-color: #1a0f08; -fx-border-width: 2;");
+    bottomBox.getChildren().addAll(scoreLabel, gridSizeBox);
+
+    // Main layout
+    root = new BorderPane();
+    root.setStyle("-fx-background-color: #2d1810;");
+    root.setTop(buttonBox);
+    root.setCenter(centerPane);
+    root.setBottom(bottomBox);
+
+    Scene localScene = new Scene(root, 600, 800, BACKGROUND_COLOR);
+    this.scene = localScene;
+
+    // Handle button toggles
+    gameButton.setOnAction(e -> showGamePanel());
+    scoresButton.setOnAction(e -> showScoresPanel());
+
+    // Set initial panel state
+    showGamePanel();
+
+    // Keyboard input only for game
     scene.setOnKeyPressed(event -> {
-      switch (event.getCode()) {
-        case UP -> moveGrid(Direction.UP);
-        case DOWN -> moveGrid(Direction.DOWN);
-        case LEFT -> moveGrid(Direction.LEFT);
-        case RIGHT -> moveGrid(Direction.RIGHT);
-        default -> {
-          // No action needed for other keys
+      if (gameButton.isSelected()) {
+        switch (event.getCode()) {
+          case UP -> gamePanel.moveGrid(Direction.UP);
+          case DOWN -> gamePanel.moveGrid(Direction.DOWN);
+          case LEFT -> gamePanel.moveGrid(Direction.LEFT);
+          case RIGHT -> gamePanel.moveGrid(Direction.RIGHT);
+          default -> {
+            // No action needed for other keys
+          }
         }
       }
     });
@@ -53,89 +142,45 @@ public class GameUI extends Application {
     // Show the stage
     primaryStage.show();
 
-    // Update grid whenever scene size changes so tiles recompute to the square area
+    // Update grid whenever scene size changes
     scene.widthProperty()
-        .addListener((obs, o, n) -> Platform.runLater(() -> resizeGrid(scene.getWidth(), scene.getHeight())));
+        .addListener((obs, o, n) -> Platform.runLater(() -> resizePanels(scene.getWidth(), scene.getHeight())));
     scene.heightProperty()
-        .addListener((obs, o, n) -> Platform.runLater(() -> resizeGrid(scene.getWidth(), scene.getHeight())));
+        .addListener((obs, o, n) -> Platform.runLater(() -> resizePanels(scene.getWidth(), scene.getHeight())));
 
-    // Initial grid setup based on initial scene size
-    Platform.runLater(() -> resizeGrid(scene.getWidth(), scene.getHeight()));
+    // Initial setup
+    Platform.runLater(() -> resizePanels(scene.getWidth(), scene.getHeight()));
   }
 
-  private void resizeGrid(double sceneWidth, double sceneHeight) {
-    // Use the smaller of width/height so the grid remains square and centered
-    double availableSize = Math.min(sceneWidth, sceneHeight);
-
-    // Calculate tile size based on grid size and gaps
-    int gridSize = gameGrid.getSize();
-    double totalGapSize = (double) GRID_GAP * (gridSize - 1);
-    currentTileSize = (availableSize - totalGapSize) / gridSize;
-
-    // Ensure minimum tile size
-    currentTileSize = Math.max(currentTileSize, 20);
-
-    // Constrain gridPane to the computed square so it will be centered by StackPane
-    gridPane.setMinWidth(availableSize);
-    gridPane.setMinHeight(availableSize);
-    gridPane.setPrefWidth(availableSize);
-    gridPane.setPrefHeight(availableSize);
-    gridPane.setMaxWidth(availableSize);
-    gridPane.setMaxHeight(availableSize);
-
-    updateGrid();
+  private void showGamePanel() {
+    centerPane.getChildren().clear();
+    centerPane.getChildren().add(gamePanel);
+    bottomBox.setVisible(true);
   }
 
-  private void updateGrid() {
-    gridPane.getChildren().clear();
-    int[][] grid = gameGrid.getGrid();
-    for (int row = 0; row < gameGrid.getSize(); row++) {
-      for (int col = 0; col < gameGrid.getSize(); col++) {
-        Rectangle tile = new Rectangle(currentTileSize, currentTileSize);
-        int value = grid[row][col];
-        if (value == 0) {
-          tile.setFill(Color.LIGHTGRAY);
-        } else {
-          tile.setFill(getTileColor(value));
-        }
-
-        gridPane.add(tile, col, row);
-
-        if (value != 0) {
-          Text text = new Text(String.valueOf(value));
-          text.setFont(Font.font("Arial", currentTileSize / 2.0));
-          text.setFill(Color.BLACK);
-          text.setTextAlignment(TextAlignment.CENTER);
-
-          GridPane.setHalignment(text, javafx.geometry.HPos.CENTER);
-          GridPane.setValignment(text, javafx.geometry.VPos.CENTER);
-
-          gridPane.add(text, col, row);
-        }
-      }
-    }
+  private void showScoresPanel() {
+    centerPane.getChildren().clear();
+    centerPane.getChildren().add(scoresPanel);
+    scoresPanel.updateScores();
+    bottomBox.setVisible(false);
   }
 
-  private Color getTileColor(int value) {
-    return switch (value) {
-      case 2 -> Color.BISQUE;
-      case 4 -> Color.BURLYWOOD;
-      case 8 -> Color.CORAL;
-      case 16 -> Color.DARKORANGE;
-      case 32 -> Color.ORANGE;
-      case 64 -> Color.ORANGERED;
-      case 128 -> Color.GOLD;
-      case 256 -> Color.GOLDENROD;
-      case 512 -> Color.YELLOW;
-      case 1024 -> Color.LIGHTYELLOW;
-      case 2048 -> Color.LIMEGREEN;
-      default -> Color.DARKGRAY;
-    };
+  private void resizePanels(double sceneWidth, double sceneHeight) {
+    // Account for top bar (~95px) and bottom bar (60px minimum) = ~170px total UI
+    // space
+    double topBarHeight = 95; // buttonBox padding + button height + padding + additional spacing
+    double bottomBarHeight = 75; // bottomBox minimum height
+    double availableHeight = sceneHeight - topBarHeight - bottomBarHeight;
+    double availableSize = Math.min(sceneWidth, availableHeight);
+    gamePanel.resizeGrid(availableSize);
+    // Ensure bottom box visibility is maintained during resize
+    bottomBox.setVisible(centerPane.getChildren().contains(gamePanel));
   }
 
-  private void moveGrid(Direction direction) {
-    if (gameGrid.moveAndAddTile(direction)) {
-      updateGrid();
-    }
+  private void changeGridSize(int newSize) {
+    gameGrid.reinit(newSize);
+    resizePanels(scene.getWidth(), scene.getHeight());
+    scoresPanel.setCurrentGridSize(newSize);
+    root.requestFocus();
   }
 }
