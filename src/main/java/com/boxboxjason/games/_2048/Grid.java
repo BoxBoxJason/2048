@@ -7,6 +7,7 @@ public class Grid {
     private int size;
     private Random random;
     private int score;
+    private long started;
 
     public Grid(int size) {
         if (size < 2) {
@@ -22,6 +23,7 @@ public class Grid {
         this.grid = new int[newSize][newSize];
         this.random = new Random();
         this.score = 0;
+        this.started = System.currentTimeMillis();
         addRandomTile();
         addRandomTile();
     }
@@ -36,6 +38,10 @@ public class Grid {
 
     public int getScore() {
         return score;
+    }
+
+    public long getDuration() {
+        return System.currentTimeMillis() - started;
     }
 
     public void addRandomTile() {
@@ -233,4 +239,15 @@ public class Grid {
         return false;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (int[] row : grid) {
+            for (int tile : row) {
+                sb.append(String.format("%4d", tile));
+            }
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
 }

@@ -943,6 +943,44 @@ class GridTest {
         }
     }
 
+    @Nested
+    @DisplayName("Duration Tests")
+    class DurationTests {
+
+        @Test
+        @DisplayName("Should return non-negative duration")
+        void testGetDurationNonNegative() {
+            Grid testGrid = new Grid(4);
+            long duration = testGrid.getDuration();
+            assertTrue(duration >= 0);
+        }
+
+        @Test
+        @DisplayName("Should reset duration on reinit")
+        void testDurationResetOnReinit() {
+            Grid testGrid = new Grid(4);
+
+            testGrid.reinit(4);
+            long durationAfterReinit = testGrid.getDuration();
+
+            // After reinit, duration should be very small (close to 0)
+            assertTrue(durationAfterReinit < 100); // Less than 100ms
+        }
+
+        @Test
+        @DisplayName("getDuration should be callable multiple times")
+        void testGetDurationMultipleCalls() {
+            Grid testGrid = new Grid(4);
+            long duration1 = testGrid.getDuration();
+            long duration2 = testGrid.getDuration();
+
+            assertTrue(duration1 >= 0);
+            assertTrue(duration2 >= 0);
+            // duration2 should be >= duration1 (or very close)
+            assertTrue(duration2 >= duration1 - 1); // Allow for 1ms difference
+        }
+    }
+
     // Helper method to clear the grid
     private void clearGrid(int[][] gridArray) {
         for (int i = 0; i < gridArray.length; i++) {
