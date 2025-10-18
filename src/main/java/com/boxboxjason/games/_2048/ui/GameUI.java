@@ -4,6 +4,7 @@ import com.boxboxjason.games._2048.Direction;
 import com.boxboxjason.games._2048.Grid;
 import com.boxboxjason.games._2048.ScoreManager;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -17,7 +18,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import javafx.application.Platform;
 
 public class GameUI extends Application {
 
@@ -42,12 +42,13 @@ public class GameUI extends Application {
     // Create panels
     gamePanel = new GamePanel(gameGrid);
     scoresPanel = new ScoresPanel(scoreManager, gameGrid.getSize());
-    gamePanel.setOnGameOver(score -> {
-      scoreManager.addScore(score);
-      scoresPanel.updateScores();
-      gameGrid.reinit(gameGrid.getSize());
-      gamePanel.resetGame();
-    });
+    gamePanel.setOnGameOver(
+        score -> {
+          scoreManager.addScore(score);
+          scoresPanel.updateScores();
+          gameGrid.reinit(gameGrid.getSize());
+          gamePanel.resetGame();
+        });
     gamePanel.setOnScoreChange(score -> scoreLabel.setText("Score: " + score));
 
     // Center pane to switch between panels
@@ -67,13 +68,14 @@ public class GameUI extends Application {
     HBox buttonBox = new HBox(20, gameButton, scoresButton);
     buttonBox.setAlignment(Pos.CENTER);
     buttonBox.setPadding(new Insets(15));
-    buttonBox.setStyle("-fx-background-color: #2d1810; -fx-border-color: #1a0f08; -fx-border-width: 2;");
+    buttonBox.setStyle(
+        "-fx-background-color: #2d1810; -fx-border-color: #1a0f08; -fx-border-width: 2;");
 
     // Style buttons - larger with ridge borders and uppercase bold text
-    String buttonStyle = "-fx-background-color: #8b4513; -fx-text-fill: #f4e4bc; -fx-font-size: 16px; -fx-font-weight: bold; "
-        +
-        "-fx-border-color: #654321; -fx-border-width: 3; -fx-border-style: solid; " +
-        "-fx-padding: 10 20 10 20; -fx-min-width: 120px; -fx-min-height: 40px;";
+    String buttonStyle =
+        "-fx-background-color: #8b4513; -fx-text-fill: #f4e4bc; -fx-font-size: 16px; -fx-font-weight: bold; "
+            + "-fx-border-color: #654321; -fx-border-width: 3; -fx-border-style: solid; "
+            + "-fx-padding: 10 20 10 20; -fx-min-width: 120px; -fx-min-height: 40px;";
     gameButton.setStyle(buttonStyle);
     scoresButton.setStyle(buttonStyle);
 
@@ -101,7 +103,8 @@ public class GameUI extends Application {
     bottomBox.setAlignment(Pos.CENTER);
     bottomBox.setPadding(new Insets(15));
     bottomBox.setMinHeight(60); // Ensure minimum height for proper display
-    bottomBox.setStyle("-fx-background-color: #2d1810; -fx-border-color: #1a0f08; -fx-border-width: 2;");
+    bottomBox.setStyle(
+        "-fx-background-color: #2d1810; -fx-border-color: #1a0f08; -fx-border-width: 2;");
     bottomBox.getChildren().addAll(scoreLabel, gridSizeBox);
 
     // Main layout
@@ -122,19 +125,20 @@ public class GameUI extends Application {
     showGamePanel();
 
     // Keyboard input only for game
-    scene.setOnKeyPressed(event -> {
-      if (gameButton.isSelected()) {
-        switch (event.getCode()) {
-          case UP -> gamePanel.moveGrid(Direction.UP);
-          case DOWN -> gamePanel.moveGrid(Direction.DOWN);
-          case LEFT -> gamePanel.moveGrid(Direction.LEFT);
-          case RIGHT -> gamePanel.moveGrid(Direction.RIGHT);
-          default -> {
-            // No action needed for other keys
+    scene.setOnKeyPressed(
+        event -> {
+          if (gameButton.isSelected()) {
+            switch (event.getCode()) {
+              case UP -> gamePanel.moveGrid(Direction.UP);
+              case DOWN -> gamePanel.moveGrid(Direction.DOWN);
+              case LEFT -> gamePanel.moveGrid(Direction.LEFT);
+              case RIGHT -> gamePanel.moveGrid(Direction.RIGHT);
+              default -> {
+                // No action needed for other keys
+              }
+            }
           }
-        }
-      }
-    });
+        });
 
     primaryStage.setTitle("2048 Game");
     primaryStage.setScene(scene);
@@ -143,10 +147,16 @@ public class GameUI extends Application {
     primaryStage.show();
 
     // Update grid whenever scene size changes
-    scene.widthProperty()
-        .addListener((obs, o, n) -> Platform.runLater(() -> resizePanels(scene.getWidth(), scene.getHeight())));
-    scene.heightProperty()
-        .addListener((obs, o, n) -> Platform.runLater(() -> resizePanels(scene.getWidth(), scene.getHeight())));
+    scene
+        .widthProperty()
+        .addListener(
+            (obs, o, n) ->
+                Platform.runLater(() -> resizePanels(scene.getWidth(), scene.getHeight())));
+    scene
+        .heightProperty()
+        .addListener(
+            (obs, o, n) ->
+                Platform.runLater(() -> resizePanels(scene.getWidth(), scene.getHeight())));
 
     // Initial setup
     Platform.runLater(() -> resizePanels(scene.getWidth(), scene.getHeight()));

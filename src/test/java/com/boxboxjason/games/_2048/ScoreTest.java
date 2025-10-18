@@ -1,12 +1,11 @@
 package com.boxboxjason.games._2048;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Test suite for the Score class.
- */
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+/** Test suite for the Score class. */
 @DisplayName("Score Test Suite")
 class ScoreTest {
 

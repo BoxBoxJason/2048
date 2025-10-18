@@ -2,6 +2,9 @@ package com.boxboxjason.games._2048.ui;
 
 import com.boxboxjason.games._2048.Score;
 import com.boxboxjason.games._2048.ScoreManager;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -10,16 +13,14 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 public class ScoresPanel extends VBox {
   private static final String FONT_FAMILY = "Arial";
   private static final String TEXT_COLOR = "#f4e4bc";
   private static final String BUTTON_BG_COLOR = "#8b4513";
   private static final String FRAME_BG_COLOR = "#2d1810";
-  private static final String WOOD_GRADIENT = "linear-gradient(from 0% 0% to 100% 100%, #8b4513, #654321, #8b4513, #a0522d, #654321)";
+  private static final String WOOD_GRADIENT =
+      "linear-gradient(from 0% 0% to 100% 100%, #8b4513, #654321, #8b4513, #a0522d, #654321)";
   private static final String BG_STYLE_PREFIX = "-fx-background-color: ";
   private static final String TEXT_STYLE_PREFIX = "-fx-text-fill: ";
   private ScoreManager scoreManager;
@@ -42,7 +43,11 @@ public class ScoresPanel extends VBox {
     // Create table header
     HBox headerRow = createTableRow("#", "Player", "Score", "Duration", "Date & Time", true);
     headerRow.setStyle(
-        BG_STYLE_PREFIX + BUTTON_BG_COLOR + "; -fx-border-color: " + FRAME_BG_COLOR + "; -fx-border-width: 0 0 2 0;");
+        BG_STYLE_PREFIX
+            + BUTTON_BG_COLOR
+            + "; -fx-border-color: "
+            + FRAME_BG_COLOR
+            + "; -fx-border-width: 0 0 2 0;");
 
     scoresContainer = new VBox(0);
     scoresContainer.setAlignment(Pos.TOP_LEFT);
@@ -58,7 +63,12 @@ public class ScoresPanel extends VBox {
     updateScores();
   }
 
-  private HBox createTableRow(String rank, String player, String score, String duration, String dateTime,
+  private HBox createTableRow(
+      String rank,
+      String player,
+      String score,
+      String duration,
+      String dateTime,
       boolean isHeader) {
     Label rankLabel = new Label(rank);
     Label playerLabel = new Label(player);
@@ -67,7 +77,8 @@ public class ScoresPanel extends VBox {
     Label dateTimeLabel = new Label(dateTime);
 
     // Style all labels
-    String labelStyle = TEXT_STYLE_PREFIX + TEXT_COLOR + "; -fx-padding: 8 12 8 12; -fx-font-size: 12px;";
+    String labelStyle =
+        TEXT_STYLE_PREFIX + TEXT_COLOR + "; -fx-padding: 8 12 8 12; -fx-font-size: 12px;";
     if (isHeader) {
       labelStyle += " -fx-font-weight: bold;";
     }
@@ -80,7 +91,11 @@ public class ScoresPanel extends VBox {
     HBox row = new HBox();
     row.getChildren().addAll(rankLabel, playerLabel, scoreLabel, durationLabel, dateTimeLabel);
     row.setStyle(
-        BG_STYLE_PREFIX + BUTTON_BG_COLOR + "; -fx-border-color: " + FRAME_BG_COLOR + "; -fx-border-width: 0 0 1 0;");
+        BG_STYLE_PREFIX
+            + BUTTON_BG_COLOR
+            + "; -fx-border-color: "
+            + FRAME_BG_COLOR
+            + "; -fx-border-width: 0 0 1 0;");
 
     return row;
   }
@@ -102,13 +117,14 @@ public class ScoresPanel extends VBox {
       for (int i = 0; i < topScores.size(); i++) {
         Score score = topScores.get(i);
         String formattedDateTime = formatDateTime(score.getDateTime());
-        HBox scoreRow = createTableRow(
-            String.valueOf(i + 1),
-            score.getUsername(),
-            String.valueOf(score.getScore()),
-            formatDuration(score.getDuration()),
-            formattedDateTime,
-            false);
+        HBox scoreRow =
+            createTableRow(
+                String.valueOf(i + 1),
+                score.getUsername(),
+                String.valueOf(score.getScore()),
+                formatDuration(score.getDuration()),
+                formattedDateTime,
+                false);
         scoresContainer.getChildren().add(scoreRow);
       }
     }
@@ -130,7 +146,8 @@ public class ScoresPanel extends VBox {
 
   private String formatDateTime(String isoDateTime) {
     try {
-      LocalDateTime dateTime = LocalDateTime.parse(isoDateTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+      LocalDateTime dateTime =
+          LocalDateTime.parse(isoDateTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
       return dateTime.format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm"));
     } catch (Exception e) {
       return isoDateTime; // Fallback to original format if parsing fails

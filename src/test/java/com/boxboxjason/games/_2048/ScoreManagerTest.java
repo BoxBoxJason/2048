@@ -1,18 +1,17 @@
 package com.boxboxjason.games._2048;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-/**
- * Test suite for the ScoreManager class.
- */
+/** Test suite for the ScoreManager class. */
 @DisplayName("ScoreManager Test Suite")
 class ScoreManagerTest {
 
@@ -36,8 +35,12 @@ class ScoreManagerTest {
   @DisplayName("Default constructor should use cross-platform file location")
   void testDefaultConstructorFilePath() {
     ScoreManager defaultManager = new ScoreManager();
-    String expectedPath = System.getProperty("user.home") + java.io.File.separator + ".2048" + java.io.File.separator
-        + "scores.json";
+    String expectedPath =
+        System.getProperty("user.home")
+            + java.io.File.separator
+            + ".2048"
+            + java.io.File.separator
+            + "scores.json";
     assertEquals(expectedPath, defaultManager.getFilePath());
   }
 
@@ -54,7 +57,8 @@ class ScoreManagerTest {
   @DisplayName("Constructor should load scores from existing file")
   void testConstructorWithFile() throws IOException {
     // Create a file with some scores
-    Files.writeString(Path.of(testFilePath),
+    Files.writeString(
+        Path.of(testFilePath),
         "[{\"username\":\"user1\",\"score\":1000,\"dateTime\":\"2023-01-01T00:00:00\",\"gridSize\":4,\"duration\":60000},{\"username\":\"user2\",\"score\":2000,\"dateTime\":\"2023-01-01T00:00:00\",\"gridSize\":4,\"duration\":120000}]");
 
     // Create new manager with the test file path
@@ -63,8 +67,12 @@ class ScoreManagerTest {
     List<Score> loadedScores = newManager.getTopScores();
     assertEquals(2, loadedScores.size());
     // Check that both scores are present
-    assertTrue(loadedScores.stream().anyMatch(s -> s.getUsername().equals("user1") && s.getScore() == 1000));
-    assertTrue(loadedScores.stream().anyMatch(s -> s.getUsername().equals("user2") && s.getScore() == 2000));
+    assertTrue(
+        loadedScores.stream()
+            .anyMatch(s -> s.getUsername().equals("user1") && s.getScore() == 1000));
+    assertTrue(
+        loadedScores.stream()
+            .anyMatch(s -> s.getUsername().equals("user2") && s.getScore() == 2000));
     // Since scores should be sorted, the first should be the highest
     assertEquals(2000, loadedScores.get(0).getScore());
   }

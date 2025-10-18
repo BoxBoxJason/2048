@@ -3,6 +3,7 @@ package com.boxboxjason.games._2048.ui;
 import com.boxboxjason.games._2048.Direction;
 import com.boxboxjason.games._2048.Grid;
 import com.boxboxjason.games._2048.Score;
+import java.util.function.Consumer;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
@@ -11,7 +12,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-import java.util.function.Consumer;
 
 public class GamePanel extends StackPane {
   private static final int GRID_GAP = 10;
@@ -116,14 +116,22 @@ public class GamePanel extends StackPane {
       dialog.setTitle("Game Over");
       dialog.setHeaderText("Final Score: " + gameGrid.getScore());
       dialog.setContentText("Enter your name:");
-      dialog.showAndWait().ifPresent(username -> {
-        if (!username.trim().isEmpty()) {
-          Score score = new Score(username.trim(), gameGrid.getScore(), gameGrid.getSize(), gameGrid.getDuration());
-          if (onGameOver != null) {
-            onGameOver.accept(score);
-          }
-        }
-      });
+      dialog
+          .showAndWait()
+          .ifPresent(
+              username -> {
+                if (!username.trim().isEmpty()) {
+                  Score score =
+                      new Score(
+                          username.trim(),
+                          gameGrid.getScore(),
+                          gameGrid.getSize(),
+                          gameGrid.getDuration());
+                  if (onGameOver != null) {
+                    onGameOver.accept(score);
+                  }
+                }
+              });
     }
     return moved;
   }

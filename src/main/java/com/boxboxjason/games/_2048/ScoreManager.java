@@ -38,8 +38,7 @@ public class ScoreManager {
 
   private void loadScores() {
     try (FileReader reader = new FileReader(filePath)) {
-      Type listType = new TypeToken<List<Score>>() {
-      }.getType();
+      Type listType = new TypeToken<List<Score>>() {}.getType();
       scores = gson.fromJson(reader, listType);
       if (scores == null) {
         scores = new ArrayList<>();
@@ -73,10 +72,7 @@ public class ScoreManager {
   }
 
   public List<Score> getTopScoresForGridSize(int gridSize) {
-    return scores.stream()
-        .filter(score -> score.getGridSize() == gridSize)
-        .limit(10)
-        .toList();
+    return scores.stream().filter(score -> score.getGridSize() == gridSize).limit(10).toList();
   }
 
   public String getFilePath() {
