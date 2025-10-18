@@ -1,5 +1,7 @@
 # 2048
 
+![2048 Logo](./icon.png)
+
 Java implementation of the popular 2048 game using Maven. The game features a grid where players can combine tiles with the same number to reach the 2048 tile. The project includes gameplay mechanics, scoring, adjustable grid sizes, high score management, and unit tests.
 
 ## Features
