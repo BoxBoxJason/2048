@@ -1,0 +1,36 @@
+name: Java CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: "25"
+
+      - name: Verify
+        run: mvn verify
+
+      - name: Compile
+        run: mvn compile
+
+      - name: Unit Tests
+        run: mvn test
+
+      - name: Validate
+        run: mvn validate
